@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "open-theremin"
+version = "0.1.0"
+description = ""
+authors = ["Gabriel da Silva Cardoso <cardoso.gabriel@proton.me>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+black = "^23.9.1"
+isort = "^5.12.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
