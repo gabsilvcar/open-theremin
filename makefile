@@ -1,5 +1,5 @@
 run:
-	poetry run python parsero
+	poetry run python open_theremin
 
 install:
 	poetry install
