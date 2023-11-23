@@ -1,11 +1,15 @@
-import cv2
 import argparse
+
+import cv2
+
 
 class DetectorClassic:
     def __init__(self):
         # Loads a cascade classifier model
         self.cascade = cv2.CascadeClassifier()
-        self.cascade.load("aGest.xml") # Haar model for detection of fists developed by https://github.com/Aravindlivewire/Opencv/blob/master/haarcascade/aGest.xml
+        self.cascade.load(
+            "aGest.xml"
+        )  # Haar model for detection of fists developed by https://github.com/Aravindlivewire/Opencv/blob/master/haarcascade/aGest.xml
 
     def detect_async(self, frame):
         # Image preparation
@@ -19,7 +23,7 @@ class DetectorClassic:
 
     def draw(self, frame, detections):
         # Draw on the frame the two detected objects most likely to be hands
-        for (x,y,w,h) in detections[0:2:1]:
-            frame = cv2.rectangle(frame, (x,y), (x+w,y+h), (255,0,255), 4)
+        for x, y, w, h in detections[0:2:1]:
+            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 255), 4)
 
         return frame

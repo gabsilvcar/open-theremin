@@ -1,5 +1,6 @@
 import cv2
 
+
 class WebcamClassic:
     def __init__(self, detector):
         # access webcam
