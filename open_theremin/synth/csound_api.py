@@ -1,6 +1,9 @@
+import threading
+import time
+
 import ctcsound
 
-class Synth(object): 
+class Synth(object):
 
     ####################################
     #
@@ -19,7 +22,7 @@ class Synth(object):
                          # Deve ser sempre maior ou igual que o ksmps.
                          # Usar sempre potencias de 2
 
-    ksmps = 128  # Valores menores resultam em uma melhor qualidade
+    ksmps = 32  # Valores menores resultam em uma melhor qualidade
                 # de sintese, mas usa mais capacidade computacional.
                 # Usar apenas potencias de 2.
 
@@ -46,12 +49,8 @@ class Synth(object):
         # Inicializacao
         self.cs = ctcsound.Csound()
         self.cs.setDebug(self.debug)
-        self.cs.setOption('-m' + str(message_out))
-        self.cs.setOption('-b -' + str(self.io_buffer_size))
-        if self.audio_to_speaker:
-            self.cs.setOption('-odac' + speaker_setting)
-        else:
-            self.cs.setOption('-o ' + self.output_file)
+        self.cs.setOption("-odac")  # Set option for Csound
+        self.cs.setOption("-m7")  # Set option for Csound
 
         # Configuracao inicial da Orquestra
         orcSettings = \
@@ -99,8 +98,24 @@ class Synth(object):
         self.cs.start()
         self.thread = ctcsound.CsoundPerformanceThread(self.cs.csound())
         self.thread.play()
+
+        # Start a separate thread to modify the frequency over time
+        self.freq_thread = threading.Thread(target=self.increase_frequency)
+        self.freq_thread.start()
         #self.cs.perform()
         #self.cs.reset()
+
+    def increase_frequency(self):
+        start_freq = 110  # starting frequency
+        end_freq = 880    # target frequency
+        duration = 120    # duration of the increase in seconds
+
+        for t in range(duration):
+            # Calculate the new frequency
+            new_freq = start_freq + (end_freq - start_freq) * t / duration
+            print(new_freq)
+            self.setControlChannel("freq", new_freq)
+            time.sleep(1)  # wait for 1 second before updating the frequency again
 
     def stopPerformance(self):
         #self.thread.stop()
