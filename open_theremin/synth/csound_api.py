@@ -14,12 +14,12 @@ class Synth(object):
 
     output_file = 'out.wav'
 
-    io_buffer_size = 4096 # Se houver latencia, diminuir,
+    io_buffer_size = 2048 # Se houver latencia, diminuir,
                          # Se o audio falhar (Buffer underrun), aumentar.
                          # Deve ser sempre maior ou igual que o ksmps.
                          # Usar sempre potencias de 2
 
-    ksmps = 32  # Valores menores resultam em uma melhor qualidade
+    ksmps = 128  # Valores menores resultam em uma melhor qualidade
                 # de sintese, mas usa mais capacidade computacional.
                 # Usar apenas potencias de 2.
 
@@ -60,28 +60,26 @@ class Synth(object):
                 sr = 44100
                 nchnls=2
                 0dbfs=1
-                """
-        self.cs.compileOrc(orcSettings)
 
-        instr1 = \
-                """
                 instr 1
                 kfreq chnget "freq"
-                kfilt chnget "filtfreq"
-                aout vco2 0.5, kfreq
-                aout moogladder aout, kfilt, 0.3
+                kampt chnget "ampt"
+                kfiltfreq chnget "filtfreq"
+                kfiltresl chnget "filtresl"
+                aout vco2 kampt, kfreq
+                aout moogladder aout, kfiltfreq, kfiltresl
                 outs aout, aout
                 endin
                 """
-        self.cs.compileOrc(instr1)
+        self.cs.compileOrc(orcSettings)
 
         # Configura Canais de Controle
         self.cs.setControlChannel("freq", 110)
         self.cs.setControlChannel("ampt", 0.6)
-        self.cs.setControlChannel("filtfreq", 1500)
-        self.cs.setControlChannel("filtresl", 1)
-        self.cs.setControlChannel("vibrfreq", 15)
-        self.cs.setControlChannel("vibrampt", 1.01)
+        self.cs.setControlChannel("filtfreq", 1100)
+        self.cs.setControlChannel("filtresl", 0.6)
+        #self.cs.setControlChannel("vibrfreq", 15)
+        #self.cs.setControlChannel("vibrampt", 1.01)
 
 
     def __del__(self):
@@ -99,10 +97,10 @@ class Synth(object):
     def startPerformance(self):
         self.cs.readScore("i1 0 120\n")
         self.cs.start()
-        #self.thread = ctcsound.CsoundPerformanceThread(self.cs.csound())
-        #self.thread.play()
-        while (self.cs.performKsmps() == 0):
-            pass
+        self.thread = ctcsound.CsoundPerformanceThread(self.cs.csound())
+        self.thread.play()
+        #self.cs.perform()
+        #self.cs.reset()
 
     def stopPerformance(self):
         #self.thread.stop()
