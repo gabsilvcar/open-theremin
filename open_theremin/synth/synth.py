@@ -1,5 +1,5 @@
 import ctcsound
-from threading import Thread
+import threading
 from functools import reduce
 
 class Synth(object):
@@ -106,16 +106,23 @@ class Synth(object):
     '''
         Thread do perform csound... :)
     '''
-    class PerformanceThread(Thread):
+    class PerformanceThread(threading.Thread):
 
         def __init__(self, csound, channels):
-            Thread.__init__(self)
+            threading.Thread.__init__(self)
+            self.__stop_event = threading.Event()
             self.cs = csound
             self.out_buffer_size = self.cs.outputBufferSize() / self.cs.ksmps()
             self.channels = channels
             self.chnIntervals = {key: [self.cs.controlChannel(key)[0],
                                             self.cs.controlChannel(key)[0], 0.0]
                                         for key in self.channels.keys()}
+
+        def stop(self):
+            self.__stop_event.set()
+
+        def stopped(self):
+            return self.__stop_event.is_set()
 
         def run(self):
             counter = self.out_buffer_size
@@ -139,7 +146,6 @@ class Synth(object):
                 self.cs.setControlChannel(key, chnInterval[0])
                 chnInterval[1] = self.channels[key][1]
                 self.chnIntervals[key] = self.__findInterpolationStep(chnInterval)
-                print(chnInterval)
 
         def __findInterpolationStep(self, chnInterval):
             step = (chnInterval[1] - chnInterval[0]) / self.out_buffer_size 
@@ -156,6 +162,6 @@ class Synth(object):
         self.thread.start()
 
     def stopPerformance(self):
-        #self.thread.stop()
+        self.thread.stop()
         self.thread.join()
         self.cs.reset()
