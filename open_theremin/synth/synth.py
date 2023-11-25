@@ -113,7 +113,8 @@ class Synth(object):
             self.cs = csound
             self.out_buffer_size = self.cs.outputBufferSize() / self.cs.ksmps()
             self.channels = channels
-            self.chnIntervals = {key: [0.0, self.cs.controlChannel(key)[0], 0.0]
+            self.chnIntervals = {key: [self.cs.controlChannel(key)[0],
+                                            self.cs.controlChannel(key)[0], 0.0]
                                         for key in self.channels.keys()}
 
         def run(self):
@@ -135,10 +136,10 @@ class Synth(object):
             for key in self.channels.keys():
                 chnInterval = self.chnIntervals[key]
                 chnInterval[0] = chnInterval[1]
-                print(chnInterval)
                 self.cs.setControlChannel(key, chnInterval[0])
                 chnInterval[1] = self.channels[key][1]
                 self.chnIntervals[key] = self.__findInterpolationStep(chnInterval)
+                print(chnInterval)
 
         def __findInterpolationStep(self, chnInterval):
             step = (chnInterval[1] - chnInterval[0]) / self.out_buffer_size 
