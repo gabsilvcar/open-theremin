@@ -10,13 +10,14 @@ width, heidth = pyautogui.size()
 synth = Synth()
 
 def findMouseLoop():
-    for i in range(performanceDuration * 100):
+    for i in range(performanceDuration * 1379):
         x, y = pyautogui.position()
         actual_x = x / width
         actual_y = 1 - (y / heidth)
-        synth.setFrequency(actual_y)
-        synth.setFilter(actual_x)
-        time.sleep(0.01)
+        synth.sendChannelUpdate("freq", actual_y)
+        synth.sendChannelUpdate("filtfreq", actual_x)
+        synth.sendChannelUpdate("filtres", actual_x)
+        time.sleep(0.000725)
 
 mouseThread = threading.Thread(target=findMouseLoop)
 
