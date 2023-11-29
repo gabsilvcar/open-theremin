@@ -28,5 +28,10 @@ class DetectorClassic:
 
         return frame
 
+    def hand_pos(self, detections):
+        for x, y, w, h in detections[0:2:1]:
+            return x + w / 2
+        return 0
+
     def close(self):
         pass

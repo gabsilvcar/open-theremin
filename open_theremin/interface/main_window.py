@@ -1,12 +1,16 @@
+import math
 import sys
 
 import cv2
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox
 
-from open_theremin.hand_detection import Webcam, Detector
-from open_theremin.hand_detection_classic import DetectorClassic, WebcamClassic
+from open_theremin.common import freq_to_note
+from open_theremin.constants import STARTING_FREQUENCY, ENDING_FREQUENCY
+from open_theremin.hand_detection import Detector
+from open_theremin.hand_detection_classic import DetectorClassic
 from open_theremin.interface.placeholder_webcam import PlaceholderWebcam
+from open_theremin.interface.webcam import Webcam
 
 
 class MainWindow(QMainWindow):
@@ -53,9 +57,9 @@ class MainWindow(QMainWindow):
         selected_source = self.source_selector.currentText()
         # Placeholder for actual source switching logic
         if selected_source == self.CLASSIC_VISION:
-            new_source = Webcam(DetectorClassic(), self.cap)
+            new_source = Webcam(DetectorClassic(), self.cap, self.update_frequency_display)
         if selected_source == self.CONVOLUTIONAL_VISION:
-            new_source = Webcam(Detector(), self.cap)
+            new_source = Webcam(Detector(), self.cap, self.update_frequency_display)
         if selected_source == self.NO_SOURCE:
             new_source = PlaceholderWebcam()
         print(f"Selected Source: {selected_source}")
@@ -64,8 +68,14 @@ class MainWindow(QMainWindow):
         self.webcam_source.close()  # Close the old widget
         self.webcam_source = new_source  # Update the reference
 
-    def update_frequency_display(self, new_frequency):
-        self.frequency_display.setText(f"Frequency: {new_frequency}")
+    def update_frequency_display(self, pos):
+        pos = max(0, pos)
+        pos = min(1, pos)
+        freq_range = ENDING_FREQUENCY - STARTING_FREQUENCY
+        freq = freq_range * pos + STARTING_FREQUENCY
+        note, oct = freq_to_note(freq)
+        self.frequency_display.setText(f"Position: {round(pos, 2)} Frequency: {round(freq, 0)} Hz Note: {note} Oct: {oct}")
+
 
     def close(self):
         self.cap.release()
