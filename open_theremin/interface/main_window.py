@@ -3,10 +3,11 @@ import sys
 
 import cv2
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox
+from PyQt6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
+                             QMainWindow, QPushButton, QVBoxLayout, QWidget)
 
 from open_theremin.common import freq_to_note
-from open_theremin.constants import STARTING_FREQUENCY, ENDING_FREQUENCY
+from open_theremin.constants import ENDING_FREQUENCY, STARTING_FREQUENCY
 from open_theremin.hand_detection import Detector
 from open_theremin.hand_detection_classic import DetectorClassic
 from open_theremin.interface.placeholder_webcam import PlaceholderWebcam
@@ -17,12 +18,13 @@ class MainWindow(QMainWindow):
     CLASSIC_VISION = "Classic Computer Vision"
     CONVOLUTIONAL_VISION = "Convolutional Computer Vision"
     NO_SOURCE = "No source"
-    def __init__(self):
+
+    def __init__(self, synth):
         super().__init__()
         self.cap = cv2.VideoCapture(0)
-
+        self.synth = synth
         # Set up the main window
-        self.setWindowTitle('Open Theremin')
+        self.setWindowTitle("Open Theremin")
         self.setGeometry(100, 100, 800, 600)
 
         # Main layout
@@ -34,7 +36,9 @@ class MainWindow(QMainWindow):
         # Source selection area
         source_selection_layout = QHBoxLayout()
         self.source_selector = QComboBox()
-        self.source_selector.addItems([self.NO_SOURCE, self.CLASSIC_VISION, self.CONVOLUTIONAL_VISION])
+        self.source_selector.addItems(
+            [self.NO_SOURCE, self.CLASSIC_VISION, self.CONVOLUTIONAL_VISION]
+        )
         source_selection_layout.addWidget(self.source_selector)
 
         # Button to apply source selection
@@ -57,7 +61,9 @@ class MainWindow(QMainWindow):
         selected_source = self.source_selector.currentText()
         # Placeholder for actual source switching logic
         if selected_source == self.CLASSIC_VISION:
-            new_source = Webcam(DetectorClassic(), self.cap, self.update_frequency_display)
+            new_source = Webcam(
+                DetectorClassic(), self.cap, self.update_frequency_display
+            )
         if selected_source == self.CONVOLUTIONAL_VISION:
             new_source = Webcam(Detector(), self.cap, self.update_frequency_display)
         if selected_source == self.NO_SOURCE:
@@ -69,14 +75,19 @@ class MainWindow(QMainWindow):
         self.webcam_source = new_source  # Update the reference
 
     def update_frequency_display(self, pos):
-        pos = max(0, pos)
-        pos = min(1, pos)
+        x, y = pos
+        x = max(0, x)
+        x = min(1, x)
         freq_range = ENDING_FREQUENCY - STARTING_FREQUENCY
-        freq = freq_range * pos + STARTING_FREQUENCY
+        freq = freq_range * x + STARTING_FREQUENCY
         note, oct = freq_to_note(freq)
-        self.frequency_display.setText(f"Position: {round(pos, 2)} Frequency: {round(freq, 0)} Hz Note: {note} Oct: {oct}")
 
+        self.frequency_display.setText(
+            f"Position: {round(x, 2)} Frequency: {round(freq, 0)} Hz Note: {note} Oct: {oct}"
+        )
+        self.synth.sendChannelUpdate("freq", freq)
+        self.synth.sendChannelUpdate("filtfreq", freq)
+        self.synth.sendChannelUpdate("filtres", freq)
 
     def close(self):
         self.cap.release()
-

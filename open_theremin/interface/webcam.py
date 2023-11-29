@@ -1,8 +1,10 @@
 import sys
+
 import cv2
-from PyQt6.QtCore import QTimer, Qt
-from PyQt6.QtGui import QPixmap, QImage
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QStatusBar
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow, QStatusBar
+
 
 class Webcam(QLabel):
     def __init__(self, detector, cap, update_frequency_display, parent=None):
@@ -25,7 +27,13 @@ class Webcam(QLabel):
             self.update_frequency_display(hand_pos)
             frame = self.detector.draw(frame, detections)
 
-            q_img = QImage(frame.data, frame.shape[1], frame.shape[0], frame.shape[1] * 3, QImage.Format.Format_RGB888)
+            q_img = QImage(
+                frame.data,
+                frame.shape[1],
+                frame.shape[0],
+                frame.shape[1] * 3,
+                QImage.Format.Format_RGB888,
+            )
             pixmap = QPixmap.fromImage(q_img)
             self.setPixmap(pixmap)
 
