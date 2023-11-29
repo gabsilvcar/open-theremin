@@ -1,13 +1,15 @@
-from synth import Synth
-import pyautogui
-import time
 import threading
+import time
 
-performanceDuration = 20 # em segundos
+import pyautogui
+from synth import Synth
+
+performanceDuration = 20  # em segundos
 
 width, heidth = pyautogui.size()
 
 synth = Synth()
+
 
 def findMouseLoop():
     for i in range(performanceDuration * 1379):
@@ -18,6 +20,7 @@ def findMouseLoop():
         synth.sendChannelUpdate("filtfreq", actual_x)
         synth.sendChannelUpdate("filtres", actual_x)
         time.sleep(0.000725)
+
 
 mouseThread = threading.Thread(target=findMouseLoop)
 

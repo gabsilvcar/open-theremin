@@ -1,30 +1,31 @@
-import ctcsound
 import threading
 from functools import reduce
 
-class Synth(object):
+import ctcsound
 
+
+class Synth(object):
     ####################################
     #
     # Configuracao
     #
 
-    input_csd = ''
+    input_csd = ""
 
     audio_to_speaker = True
-    speaker_device_name = ''
+    speaker_device_name = ""
 
-    output_file = 'out.wav'
+    output_file = "out.wav"
 
-    out_buffer_size = 64 # Se houver latencia, diminuir,
-                         # Se o audio falhar (Buffer underrun), aumentar.
-                         # Deve ser sempre maior ou igual que o ksmps.
-                         # Usar sempre potencias de 2.
-                         # O valor real eh esse * ksmps.
+    out_buffer_size = 64  # Se houver latencia, diminuir,
+    # Se o audio falhar (Buffer underrun), aumentar.
+    # Deve ser sempre maior ou igual que o ksmps.
+    # Usar sempre potencias de 2.
+    # O valor real eh esse * ksmps.
 
     ksmps = 32  # Valores menores resultam em uma melhor qualidade
-                # de sintese, mas usa mais capacidade computacional.
-                # Usar apenas potencias de 2.
+    # de sintese, mas usa mais capacidade computacional.
+    # Usar apenas potencias de 2.
 
     message_note_amplitude = False
     message_warnings = True
@@ -39,10 +40,12 @@ class Synth(object):
 
     def __init__(self):
         # Definicao de valores de inicializacao
-        self.message_out = 2 \
-            + (1 if self.message_note_amplitude else 0) \
-            + (4 if self.message_warnings else 0) \
+        self.message_out = (
+            2
+            + (1 if self.message_note_amplitude else 0)
+            + (4 if self.message_warnings else 0)
             + (128 if self.message_benchmark_info else 0)
+        )
 
         # Inicializacao
         self.cs = ctcsound.Csound()
@@ -52,9 +55,11 @@ class Synth(object):
         self.cs.setOption("-b -" + str(self.out_buffer_size))
 
         # Configuracao inicial da Orquestra
-        orcSettings = \
-                "ksmps=" + str(self.ksmps) + "\n" + \
-                """
+        orcSettings = (
+            "ksmps="
+            + str(self.ksmps)
+            + "\n"
+            + """
                 sr = 44100
                 nchnls=2
                 0dbfs=1
@@ -69,6 +74,7 @@ class Synth(object):
                 outs aout, aout
                 endin
                 """
+        )
         self.cs.compileOrc(orcSettings)
 
         # Configura Canais de Controle
@@ -78,22 +84,23 @@ class Synth(object):
         self.channels["freq"] = [self.__normalizeFreq, 110]
 
         self.cs.setControlChannel("ampt", 0.6)
-        
+
         self.cs.setControlChannel("filtfreq", 1100)
         self.channels["filtfreq"] = [self.__normalizeFiltFreq, 1100]
-        
+
         self.cs.setControlChannel("filtresl", 0.6)
         self.channels["filtres"] = [self.__normalizeFiltResl, 0.6]
 
-        #self.cs.setControlChannel("vibrfreq", 15)
-        #self.cs.setControlChannel("vibrampt", 1.01)
+        # self.cs.setControlChannel("vibrfreq", 15)
+        # self.cs.setControlChannel("vibrampt", 1.01)
 
     def __del__(self):
         del self.cs
-    
-    '''
+
+    """
         Auxilliary methods
-    '''
+    """
+
     def __normalizeFreq(self, value):
         return 55 + 880 * value
 
@@ -102,21 +109,26 @@ class Synth(object):
 
     def __normalizeFiltResl(self, value):
         return 1 - 2 * value
-    
-    '''
-        Thread do perform csound... :)
-    '''
-    class PerformanceThread(threading.Thread):
 
+    """
+        Thread do perform csound... :)
+    """
+
+    class PerformanceThread(threading.Thread):
         def __init__(self, csound, channels):
             threading.Thread.__init__(self)
             self.__stop_event = threading.Event()
             self.cs = csound
             self.out_buffer_size = self.cs.outputBufferSize() / self.cs.ksmps()
             self.channels = channels
-            self.chnIntervals = {key: [self.cs.controlChannel(key)[0],
-                                            self.cs.controlChannel(key)[0], 0.0]
-                                        for key in self.channels.keys()}
+            self.chnIntervals = {
+                key: [
+                    self.cs.controlChannel(key)[0],
+                    self.cs.controlChannel(key)[0],
+                    0.0,
+                ]
+                for key in self.channels.keys()
+            }
 
         def stop(self):
             self.__stop_event.set()
@@ -127,8 +139,8 @@ class Synth(object):
         def run(self):
             counter = self.out_buffer_size
             self.__updateChannels()
-            while (self.cs.performKsmps() == 0):
-                if (counter == 1):
+            while self.cs.performKsmps() == 0:
+                if counter == 1:
                     self.__updateChannels()
                     counter = self.out_buffer_size
                 else:
@@ -148,7 +160,7 @@ class Synth(object):
                 self.chnIntervals[key] = self.__findInterpolationStep(chnInterval)
 
         def __findInterpolationStep(self, chnInterval):
-            step = (chnInterval[1] - chnInterval[0]) / self.out_buffer_size 
+            step = (chnInterval[1] - chnInterval[0]) / self.out_buffer_size
             chnInterval[2] = step
             return chnInterval
 
