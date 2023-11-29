@@ -1,60 +1,32 @@
+import sys
 import cv2
-import mediapipe as mp
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QWidget, QLabel
-from mediapipe import ImageFormat
+from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QStatusBar
 
-class ImageWindow(QWidget):
-    def __init__(self):
-        super().__init__()
+class Webcam(QLabel):
+    def __init__(self, detector, cap, parent=None):
+        self.cap = cap
+        super().__init__(parent)
+        self.detector = detector
+        # Timer to update the webcam feed
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_frame)
+        self.timer.start(20)  # Adjust frame rate as needed
 
-        # Set window properties
-        self.setWindowTitle('Image Viewer')
-        self.setGeometry(100, 100, 800, 600)  # x, y, width, height
-
-        # Add a label and set a pixmap
-        self.label = QLabel(self)
-        self.label.setPixmap(QPixmap('path_to_your_image.jpg'))  # Replace with your image path
-        # Resize the label to fit the image
-        self.label.resize(self.label.pixmap().size())
-
-        # Show the window
-        self.show()
-
-class Webcam(QWidget):
-    def __init__(self, detector):
-        super().__init__()
-
-        # Set window properties
-        self.setWindowTitle('Image Viewer')
-        self.setGeometry(100, 100, 800, 600)  # x, y, width, height
-        self.label = QLabel(self)
-
-        # access webcam
-        cap = cv2.VideoCapture(0)
-
-        while True:
-            # pull frame
-            ret, frame = cap.read()
+    def update_frame(self):
+        ret, frame = self.cap.read()
+        if ret:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame = cv2.flip(frame, 1)
-            # mirror frame
-            # frame = cv2.flip(frame, 1)
-            # update landmarker results
-            detector.detect_async(frame)
+            detections = self.detector.detect_async(frame)
+            frame = self.detector.draw(frame, detections)
 
-            frame = detector.draw(frame)
+            q_img = QImage(frame.data, frame.shape[1], frame.shape[0], frame.shape[1] * 3, QImage.Format.Format_RGB888)
+            pixmap = QPixmap.fromImage(q_img)
+            self.setPixmap(pixmap)
 
-            self.label = QLabel(self)
-            self.label.setPixmap(frame)  # Replace with your image path
-
-            # display image
-            # cv2.imshow("frame", frame)
-            self.show()
-
-            if cv2.waitKey(1) == ord("q"):
-                break
-
-        # release everything
-        detector.close()
-        cap.release()
-        cv2.destroyAllWindows()
+    def close(self):
+        self.timer.stop()
+        self.detector.close()
+        super().close()

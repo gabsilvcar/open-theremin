@@ -52,7 +52,7 @@ class Detector:
         # close landmarker
         self.landmarker.close()
 
-    def draw(self, frame):
+    def draw(self, frame, detections):
         # draw landmarks on frame
         frame = draw_landmarks_on_image(frame, self.result)
         # count number of fingers raised
