@@ -13,7 +13,7 @@ pytest = "^7.4.2"
 mediapipe = "^0.10.5"
 opencv-python = "^4.8.1.78"
 ctcsound = "^6.17.1"
-
+pyqt6 = "^6.6.0"
 
 [build-system]
 requires = ["poetry-core"]
