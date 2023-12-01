@@ -8,7 +8,7 @@ class DetectorClassic:
         # Loads a cascade classifier model
         self.cascade = cv2.CascadeClassifier()
         self.cascade.load(
-            "aGest.xml"
+            "model/aGest.xml"
         )  # Haar model for detection of fists developed by https://github.com/Aravindlivewire/Opencv/blob/master/haarcascade/aGest.xml
 
     def detect_async(self, frame):
@@ -27,3 +27,11 @@ class DetectorClassic:
             frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 255), 4)
 
         return frame
+
+    def hand_pos(self, detections):
+        for x, y, w, h in detections[0:2:1]:
+            return x + w / 2, y + h / 2
+        return 0, 0
+
+    def close(self):
+        pass

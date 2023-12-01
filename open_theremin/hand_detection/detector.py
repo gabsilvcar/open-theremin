@@ -52,12 +52,31 @@ class Detector:
         # close landmarker
         self.landmarker.close()
 
-    def draw(self, frame):
+    def draw(self, frame, detections):
         # draw landmarks on frame
         frame = draw_landmarks_on_image(frame, self.result)
         # count number of fingers raised
-        frame = count_fingers_raised(frame, self.result)
+        # frame = count_fingers_raised(frame, self.result)
         return frame
+
+    def hand_pos(self, detections):
+        return get_hand_pos(self.result)
+
+
+def get_hand_pos(detection_result):
+    try:
+        if detection_result.hand_landmarks == []:
+            return 0, 0
+        else:
+            hand_landmarks_list = detection_result.hand_landmarks
+            for idx in range(len(hand_landmarks_list)):
+                if detection_result.handedness[idx][0].category_name == "Right":
+                    # hand landmarks is a list of landmarks where each entry in the list has an x, y, and z in normalized image coordinates
+                    hand_landmarks = hand_landmarks_list[idx]
+                    return hand_landmarks[0].x, hand_landmarks[0].y
+            return 0, 0
+    except:
+        return 0, 0
 
 
 def draw_landmarks_on_image(
