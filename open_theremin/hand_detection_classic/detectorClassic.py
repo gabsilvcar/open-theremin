@@ -23,9 +23,18 @@ class DetectorClassic:
         # Normalizing detections
         width = frame_gray.shape[0]
         height = frame_gray.shape[1]
-        detections_norm:list = []
+        detections_norm: list = []
         for x, y, w, h in detections:
-            detections_norm.append( np.array( [ (x/(float)(width)), (y/(float)(height)), (w/(float)(width)), (h/(float)(height)) ] ) )
+            detections_norm.append(
+                np.array(
+                    [
+                        (x / (float)(width)),
+                        (y / (float)(height)),
+                        (w / (float)(width)),
+                        (h / (float)(height)),
+                    ]
+                )
+            )
 
         return detections_norm
 
@@ -34,7 +43,13 @@ class DetectorClassic:
         width = frame.shape[0]
         height = frame.shape[1]
         for x, y, w, h in detections[0:2:1]:
-            frame = cv2.rectangle(frame, ((int)(x*width), (int)(y*height)), ((int)((x + w)*width), (int)((y + h)*height)), (255, 0, 255), 4)
+            frame = cv2.rectangle(
+                frame,
+                ((int)(x * width), (int)(y * height)),
+                ((int)((x + w) * width), (int)((y + h) * height)),
+                (255, 0, 255),
+                4,
+            )
 
         return frame
 
