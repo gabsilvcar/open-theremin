@@ -19,10 +19,12 @@ class MainWindow(QMainWindow):
     CONVOLUTIONAL_VISION = "Convolutional Computer Vision"
     NO_SOURCE = "No source"
 
-    def __init__(self, synth):
+    def __init__(self, freq_value, volume_value, waveform_value):
         super().__init__()
         self.cap = cv2.VideoCapture(0)
-        self.synth = synth
+        self.freq_value = freq_value
+        self.volume_value = volume_value
+        self.waveform_value = waveform_value
         # Set up the main window
         self.setWindowTitle("Open Theremin")
         self.setGeometry(100, 100, 800, 600)
@@ -52,10 +54,23 @@ class MainWindow(QMainWindow):
         self.frequency_display = QLabel("Frequency: -- Hz")
         self.main_layout.addWidget(self.frequency_display)
 
+        # Create waveform selection dropdown
+        self.waveform_selection = QComboBox()
+        self.waveform_selection.addItem("Sine Wave", 1)
+        self.waveform_selection.addItem("Triangle Wave", 2)
+        self.waveform_selection.addItem("Square Wave", 3)
+        self.waveform_selection.currentIndexChanged.connect(self.update_waveform)
+        self.main_layout.addWidget(self.waveform_selection)
+
         # Set the main layout
         container = QWidget()
         container.setLayout(self.main_layout)
         self.setCentralWidget(container)
+
+    def update_waveform(self, index):
+        # Update the waveform value
+        self.waveform_value.value = self.waveform_selection.currentData()
+        print(self.waveform_value.value)
 
     def apply_source_selection(self):
         selected_source = self.source_selector.currentText()
@@ -78,16 +93,23 @@ class MainWindow(QMainWindow):
         x, y = pos
         x = max(0, x)
         x = min(1, x)
+        print(y)
+        y = max(0, y)
+        y = min(1, y)
         freq_range = ENDING_FREQUENCY - STARTING_FREQUENCY
         freq = freq_range * x + STARTING_FREQUENCY
+        freq = 0 if freq == ENDING_FREQUENCY else freq  # Disable if no hand detected
         note, oct = freq_to_note(freq)
 
         self.frequency_display.setText(
             f"Position: {round(x, 2)} Frequency: {round(freq, 0)} Hz Note: {note} Oct: {oct}"
         )
-        self.synth.sendChannelUpdate("freq", freq)
-        self.synth.sendChannelUpdate("filtfreq", freq)
-        self.synth.sendChannelUpdate("filtres", freq)
+        self.freq_value.value = freq
+        self.volume_value.value = y
+
+        # self.synth.sendChannelUpdate("freq", freq)
+        # self.synth.sendChannelUpdate("filtfreq", freq)
+        # self.synth.sendChannelUpdate("filtres", freq)
 
     def close(self):
         self.cap.release()
