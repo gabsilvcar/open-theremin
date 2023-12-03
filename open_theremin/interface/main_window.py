@@ -19,10 +19,12 @@ class MainWindow(QMainWindow):
     CONVOLUTIONAL_VISION = "Convolutional Computer Vision"
     NO_SOURCE = "No source"
 
-    def __init__(self, freq_value):
+    def __init__(self, freq_value, volume_value):
         super().__init__()
         self.cap = cv2.VideoCapture(0)
         self.freq_value = freq_value
+        self.volume_value = volume_value
+
         # Set up the main window
         self.setWindowTitle("Open Theremin")
         self.setGeometry(100, 100, 800, 600)
@@ -78,6 +80,9 @@ class MainWindow(QMainWindow):
         x, y = pos
         x = max(0, x)
         x = min(1, x)
+        print(y)
+        y = max(0, y)
+        y = min(1, y)
         freq_range = ENDING_FREQUENCY - STARTING_FREQUENCY
         freq = freq_range * x + STARTING_FREQUENCY
         freq = (0 if freq == ENDING_FREQUENCY else freq) # Disable if no hand detected
@@ -87,6 +92,8 @@ class MainWindow(QMainWindow):
             f"Position: {round(x, 2)} Frequency: {round(freq, 0)} Hz Note: {note} Oct: {oct}"
         )
         self.freq_value.value = freq
+        self.volume_value.value = y
+
         # self.synth.sendChannelUpdate("freq", freq)
         # self.synth.sendChannelUpdate("filtfreq", freq)
         # self.synth.sendChannelUpdate("filtres", freq)
