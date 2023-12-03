@@ -17,7 +17,7 @@ from open_theremin.interface.webcam import Webcam
 class MainWindow(QMainWindow):
     CLASSIC_VISION = "Classic Computer Vision"
     CONVOLUTIONAL_VISION = "Convolutional Computer Vision"
-    NO_SOURCE = "No source"
+    NO_SOURCE = "No source "
 
     def __init__(self, synth):
         super().__init__()
