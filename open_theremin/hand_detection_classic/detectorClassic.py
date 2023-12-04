@@ -1,6 +1,7 @@
 import argparse
 
 import cv2
+import numpy as np
 
 
 class DetectorClassic:
@@ -8,7 +9,7 @@ class DetectorClassic:
         # Loads a cascade classifier model
         self.cascade = cv2.CascadeClassifier()
         self.cascade.load(
-            "model/aGest.xml"
+            "model/cascade.xml"
         )  # Haar model for detection of fists developed by https://github.com/Aravindlivewire/Opencv/blob/master/haarcascade/aGest.xml
 
     def detect_async(self, frame):
@@ -19,12 +20,36 @@ class DetectorClassic:
         # Detection of hands
         detections = self.cascade.detectMultiScale(frame_gray)
 
-        return detections
+        # Normalizing detections
+        width = frame_gray.shape[0]
+        height = frame_gray.shape[1]
+        detections_norm: list = []
+        for x, y, w, h in detections:
+            detections_norm.append(
+                np.array(
+                    [
+                        (x / (float)(width)),
+                        (y / (float)(height)),
+                        (w / (float)(width)),
+                        (h / (float)(height)),
+                    ]
+                )
+            )
+
+        return detections_norm
 
     def draw(self, frame, detections):
         # Draw on the frame the two detected objects most likely to be hands
+        width = frame.shape[0]
+        height = frame.shape[1]
         for x, y, w, h in detections[0:2:1]:
-            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 255), 4)
+            frame = cv2.rectangle(
+                frame,
+                ((int)(x * width), (int)(y * height)),
+                ((int)((x + w) * width), (int)((y + h) * height)),
+                (255, 0, 255),
+                4,
+            )
 
         return frame
 
