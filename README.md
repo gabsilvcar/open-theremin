@@ -24,3 +24,6 @@ The dependencies of this project are managed with poetry. Learn about it in http
 
 If you have any problems with csound dependencies, you may want to build and installed it manually.
 Follow the build instructions for your machine on the BUILD.md, found at the https://github.com/csound/csound/ repo.
+
+## Qt6
+This project uses qt6 for it's graphical interface and needs to be installed before running

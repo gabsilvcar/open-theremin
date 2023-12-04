@@ -3,8 +3,16 @@ import sys
 
 import cv2
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel,
-                             QMainWindow, QPushButton, QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
 
 from open_theremin.common import freq_to_note
 from open_theremin.constants import ENDING_FREQUENCY, STARTING_FREQUENCY
@@ -70,7 +78,6 @@ class MainWindow(QMainWindow):
     def update_waveform(self, index):
         # Update the waveform value
         self.waveform_value.value = self.waveform_selection.currentData()
-        print(self.waveform_value.value)
 
     def apply_source_selection(self):
         selected_source = self.source_selector.currentText()
@@ -83,7 +90,6 @@ class MainWindow(QMainWindow):
             new_source = Webcam(Detector(), self.cap, self.update_frequency_display)
         if selected_source == self.NO_SOURCE:
             new_source = PlaceholderWebcam()
-        print(f"Selected Source: {selected_source}")
         # Replace the old webcam widget with the new one
         self.main_layout.replaceWidget(self.webcam_source, new_source)
         self.webcam_source.close()  # Close the old widget

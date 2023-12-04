@@ -4,8 +4,14 @@ from multiprocessing import Process, Value
 
 import ctcsound
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (QApplication, QComboBox, QMainWindow, QSlider,
-                             QVBoxLayout, QWidget)
+from PyQt6.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QMainWindow,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class Synthesizer:
@@ -58,7 +64,6 @@ class Synthesizer:
 
         while self.c.performKsmps() == 0:
             if self.waveform_value.value != self.current_wave:
-                print(self.waveform_value.value)
                 self.current_wave = self.waveform_value.value
                 break
 
@@ -119,7 +124,6 @@ class SynthTestWindow(QMainWindow):
     def update_waveform(self, index):
         # Update the waveform value
         self.waveform_value.value = self.waveform_selection.currentData()
-        print(self.waveform_value.value)
 
 
 if __name__ == "__main__":
