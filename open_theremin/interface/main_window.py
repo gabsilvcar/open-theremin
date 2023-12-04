@@ -93,13 +93,15 @@ class MainWindow(QMainWindow):
         x, y = pos
         x = max(0, x)
         x = min(1, x)
-        print(y)
         y = max(0, y)
         y = min(1, y)
         freq_range = ENDING_FREQUENCY - STARTING_FREQUENCY
         freq = freq_range * x + STARTING_FREQUENCY
-        freq = 0 if freq == ENDING_FREQUENCY else freq  # Disable if no hand detected
-        note, oct = freq_to_note(freq)
+        freq = 0 if freq >= ENDING_FREQUENCY else freq  # Disable if no hand detected
+        note = "F#"
+        oct = 2
+        if freq > 0:
+            note, oct = freq_to_note(freq)
 
         self.frequency_display.setText(
             f"Position: {round(x, 2)} Frequency: {round(freq, 0)} Hz Note: {note} Oct: {oct}"
